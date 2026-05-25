@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import DGisMap from '../components/DGisMap'
-import { Place } from '../lib/types'
+import { Place, PlaceCategory } from '../lib/types'
 import { useAppState } from '../state/AppState'
 
 const API_KEY = '3ff84733-cfa1-42b2-ac55-a7a7e9e3c301';
@@ -253,14 +253,15 @@ export default function MapPage() {
         name: placeName,
         lat: placeLat,
         lng: placeLng,
-        category: 'walk',
+        category: 'walk' as PlaceCategory,
         tags: ['реальное', 'найдено', 'геолокация'],
         aiPitch: `Найдено по карте 2ГИС: ${placeName}. Идеальное место для небольшой прогулки.`,
         company: placeName,
         address: nearestPlaceData.address_name || `Координаты: ${placeLat.toFixed(5)}, ${placeLng.toFixed(5)}`,
         description: `Найденное место: ${placeName}. Тип: ${nearestPlaceData.type || 'объект'}.`,
         partner: false,
-        rewards: []
+        rewards: [],
+        highlight: 'linear-gradient(135deg, #90be6d 0%, #43aa8b 100%)'
       };
       
       console.log('Создан объект для приложения:', formattedPlace);

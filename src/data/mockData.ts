@@ -1,6 +1,6 @@
 import { Coordinates, Friend, Note, Place, Quest, StoredState } from '../lib/types'
 
-export const defaultLocation: Coordinates | null = null
+export const defaultLocation: Coordinates = { lat: 56.0184, lng: 92.8679 }
 
 export const places: Place[] = [
   {
