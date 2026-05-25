@@ -10,6 +10,28 @@ function progressPercent(current: number, target: number) {
   return Math.min(100, Math.round((current / target) * 100))
 }
 
+// SVG Icons
+const BinocularsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 12H5M21 12H19M8 12C8 14.2091 6.20914 16 4 16C1.79086 16 0 14.2091 0 12C0 9.79086 1.79086 8 4 8C6.20914 8 8 9.79086 8 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M24 12C24 14.2091 22.2091 16 20 16C17.7909 16 16 14.2091 16 12C16 9.79086 17.7909 8 20 8C22.2091 8 24 9.79086 24 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4 16L10 20M20 16L14 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4 8L10 4M20 8L14 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const TicketIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 5C21 6.65685 19.6569 8 18 8C16.3431 8 15 6.65685 15 5C15 3.34315 16.3431 2 18 2C19.6569 2 21 3.34315 21 5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M21 19C21 20.6569 19.6569 22 18 22C16.3431 22 15 20.6569 15 19C15 17.3431 16.3431 16 18 16C19.6569 16 21 17.3431 21 19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 5C3 6.65685 4.34315 8 6 8C7.65685 8 9 6.65685 9 5C9 3.34315 7.65685 2 6 2C4.34315 2 3 3.34315 3 5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 19C3 20.6569 4.34315 22 6 22C7.65685 22 9 20.6569 9 19C9 17.3431 7.65685 16 6 16C4.34315 16 3 17.3431 3 19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 12H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2 12H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 12H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export default function MapPage() {
   const [searchParams] = useSearchParams()
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
@@ -372,6 +394,7 @@ export default function MapPage() {
   //   return clearPromptTimer
   // }, [locationReady, state.currentLocation.lat, state.currentLocation.lng])
 
+
   useEffect(() => clearPromptTimer, [])
 
   const handlePlaceSelect = (place: Place) => {
@@ -403,12 +426,22 @@ export default function MapPage() {
           </div>
           <div className="map-metrics">
             <div className="metric-chip" onClick={() => window.location.href = '/rewards'} style={{cursor: 'pointer'}}>
-              <strong>{appStats?.uniqueVisited || 0}</strong>
-              <span>Мест открыто</span>
+              <div className="metric-content">
+                <strong>{appStats?.uniqueVisited || 0}</strong>
+                <div className="metric-label">
+                  <span className="icon"><BinocularsIcon /></span>
+                  <span className="text">мест открыто</span>
+                </div>
+              </div>
             </div>
             <div className="metric-chip accent" onClick={() => window.location.href = '/rewards'} style={{cursor: 'pointer'}}>
-              <strong>{appStats?.unlockedRewards || 0}</strong>
-              <span>Призов доступно</span>
+              <div className="metric-content">
+                <strong>{appStats?.unlockedRewards || 0}</strong>
+                <div className="metric-label">
+                  <span className="icon"><TicketIcon /></span>
+                  <span className="text">призов доступно</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
