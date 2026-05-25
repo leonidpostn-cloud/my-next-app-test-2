@@ -483,7 +483,7 @@ button {
 .map-location-prompt {
   position: absolute;
   left: 50%;
-  bottom: 150px;
+  bottom: 120px;
   z-index: 20;
   display: grid;
   gap: 14px;
@@ -495,6 +495,29 @@ button {
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
   transform: translateX(-50%);
+}
+
+@media (max-width: 720px) {
+  .map-location-prompt {
+    bottom: 100px;
+    width: calc(100% - 32px);
+  }
+}
+
+@media (max-width: 480px) {
+  .map-location-prompt {
+    bottom: 90px;
+    width: calc(100% - 16px);
+    padding: 14px;
+  }
+  
+  .map-location-prompt h3 {
+    font-size: 1rem;
+  }
+  
+  .prompt-actions {
+    gap: 8px;
+  }
 }
 
 .map-location-prompt h3 {

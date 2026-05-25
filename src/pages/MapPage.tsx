@@ -414,10 +414,10 @@ export default function MapPage() {
         </div>
 
         {realPromptPlace && (
-          <div className="map-location-prompt" style={{position: 'absolute', bottom: '80px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000, background: 'white', padding: '8px 12px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', maxWidth: '85vw', textAlign: 'center'}}>
+          <div className="map-location-prompt">
             <h3>Вы здесь?</h3>
-            <p style={{margin: '8px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{realPromptPlace.name}</p>
-            <div className="prompt-actions" style={{marginTop: '10px'}}>
+            <p>{realPromptPlace.name}</p>
+            <div className="prompt-actions">
               <button
                 className="primary-button"
                 onClick={() => {
