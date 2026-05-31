@@ -10,29 +10,23 @@ function progressPercent(current: number, target: number) {
   return Math.min(100, Math.round((current / target) * 100))
 }
 
-// SVG Icons
 const BinocularsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 10C8 7.79086 6.20914 6 4 6C1.79086 6 0 7.79086 0 10C0 12.2091 1.79086 14 4 14C6.20914 14 8 12.2091 8 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M16 10C16 7.79086 14.2091 6 12 6C9.79086 6 8 7.79086 8 10C8 12.2091 9.79086 14 12 14C14.2091 14 16 12.2091 16 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M4 6V4L6 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 6V4L10 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M4 14V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 14V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M2 18H22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 6L6.5 10.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M16 6L17.5 10.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M8.5 6H15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M9.5 12.5C9.5 15 7.5 17 5 17C2.5 17 1 15 1 12.5C1 10 2.5 8 5 8C7.5 8 9.5 10 9.5 12.5Z" stroke="currentColor" strokeWidth="2" />
+    <path d="M23 12.5C23 15 21.5 17 19 17C16.5 17 14.5 15 14.5 12.5C14.5 10 16.5 8 19 8C21.5 8 23 10 23 12.5Z" stroke="currentColor" strokeWidth="2" />
+    <path d="M9.5 12.5H14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
 const TicketIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M2 8H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M2 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M2 16H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M22 8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M22 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M22 16H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 4V20" stroke="currentColor" strokeWidth="2" strokeDasharray="2 2" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 8.5V6.5C3 5.4 3.9 4.5 5 4.5H19C20.1 4.5 21 5.4 21 6.5V8.5C19.35 8.5 18 9.85 18 11.5C18 13.15 19.35 14.5 21 14.5V17.5C21 18.6 20.1 19.5 19 19.5H5C3.9 19.5 3 18.6 3 17.5V14.5C4.65 14.5 6 13.15 6 11.5C6 9.85 4.65 8.5 3 8.5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    <path d="M12 7.5V8.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M12 11V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M12 14.5V15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
@@ -42,6 +36,7 @@ export default function MapPage() {
   const [locationReady, setLocationReady] = useState(false)
   const [promptPlaceId, setPromptPlaceId] = useState<string | null>(null)
   const [realPromptPlace, setRealPromptPlace] = useState<Place | null>(null)
+  const [discoverPlaces, setDiscoverPlaces] = useState<Place[]>([])
   const [rejectedPromptIds, setRejectedPromptIds] = useState<string[]>([])
   const [confirmedPromptIds, setConfirmedPromptIds] = useState<string[]>([])
   const promptTimerRef = useRef<number | null>(null)
@@ -59,14 +54,32 @@ export default function MapPage() {
   } = useAppState()
 
   useEffect(() => {
+    const rawPlaces = window.sessionStorage.getItem('otkryvaika-discover-places')
+
+    if (!rawPlaces) {
+      return
+    }
+
+    try {
+      const parsedPlaces = JSON.parse(rawPlaces)
+
+      if (Array.isArray(parsedPlaces)) {
+        setDiscoverPlaces(parsedPlaces)
+      }
+    } catch (parseError) {
+      console.warn('Could not parse discover places:', parseError)
+    }
+  }, [])
+
+  useEffect(() => {
     const focusedPlaceId = searchParams.get('focus')
-    if (focusedPlaceId && places.some((place) => place.id === focusedPlaceId)) {
+    if (focusedPlaceId && [...places, ...discoverPlaces].some((place) => place.id === focusedPlaceId)) {
       setSelectedPlaceId(focusedPlaceId)
     }
-  }, [places, searchParams])
+  }, [places, discoverPlaces, searchParams])
 
   const selectedPlace =
-    places.find((place) => place.id === selectedPlaceId) ?? nearbyPlaces[0]?.place ?? null
+    [...places, ...discoverPlaces].find((place) => place.id === selectedPlaceId) ?? nearbyPlaces[0]?.place ?? null
 
   const focusedLocation =
     selectedPlaceId && selectedPlace
@@ -414,7 +427,7 @@ export default function MapPage() {
             zoom={14}
             onMapLoad={() => {}}
             onPlaceSelect={handlePlaceSelect}
-            recommendedPlaces={activeQuest.recommendedPlaces}
+            recommendedPlaces={[...(activeQuest.recommendedPlaces ?? []), ...discoverPlaces]}
             confirmedPlaceIds={confirmedPromptIds}
             confirmedPlaces={places.filter((place) => confirmedPromptIds.includes(place.id))}
             handleLocateMe={handleLocateMe}
@@ -431,12 +444,22 @@ export default function MapPage() {
             </div>
             <div className="map-metrics" style={{position: 'static', top: 'auto', right: 'auto'}}>
               <div className="metric-chip" onClick={() => window.location.href = '/rewards'} style={{cursor: 'pointer'}}>
-                <strong>{appStats?.uniqueVisited || 0}</strong>
-                <BinocularsIcon />
+                <div className="metric-content">
+                  <strong>{appStats?.uniqueVisited || 0}</strong>
+                  <div className="metric-label">
+                    <span className="icon"><BinocularsIcon /></span>
+                    <span className="text">мест открыто</span>
+                  </div>
+                </div>
               </div>
               <div className="metric-chip accent" onClick={() => window.location.href = '/rewards'} style={{cursor: 'pointer'}}>
-                <strong>{appStats?.unlockedRewards || 0}</strong>
-                <TicketIcon />
+                <div className="metric-content">
+                  <strong>{appStats?.unlockedRewards || 0}</strong>
+                  <div className="metric-label">
+                    <span className="icon"><TicketIcon /></span>
+                    <span className="text">призов доступно</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -28,7 +28,7 @@ export default function RewardsPage() {
           <div className="eyebrow">Призы и квесты</div>
           <h2>Вся механика достижений уже собрана в одном месте</h2>
           <p>
-            Здесь видно, к чему пользователь идёт, какие партнёрские акции рядом и какие
+            Здесь видно, к чему пользователь идёт, какие специальные акции рядом и какие
             реальные бонусы уже доступны.
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function RewardsPage() {
               <article className="reward-card" key={reward.id}>
                 <span className="scope-pill partner">{reward.kind === 'promo' ? 'Промокод' : 'Подарок'}</span>
                 <h3>{reward.title}</h3>
-                {reward.code ? <div className="code-chip">{reward.code}</div> : <p>Можно показать партнёру на кассе.</p>}
+                {reward.code ? <div className="code-chip">{reward.code}</div> : <p>Можно показать на кассе.</p>}
               </article>
             ))
           ) : (
@@ -80,7 +80,7 @@ export default function RewardsPage() {
         <div className="section-heading">
           <strong>Активные квесты</strong>
           <span className="muted">
-            Партнёрские задачи подсвечены, если они уже доступны рядом с текущей точкой.
+            Некоторые квесты выделены как акции или специальные предложения.
           </span>
         </div>
 
@@ -88,14 +88,24 @@ export default function RewardsPage() {
           {sortedQuests.map((item) => {
             const percent = progressPercent(item.current, item.quest.target)
             const isActive = activeQuest.quest.id === item.quest.id
+            const isPartnerOffer = item.quest.scope === 'partner'
+            const questClasses = [
+              'quest-card',
+              isActive ? 'active' : '',
+              isPartnerOffer ? 'partner-offer' : '',
+              item.quest.reward.kind === 'promo' ? 'promo-offer' : '',
+              item.quest.reward.kind === 'gift' ? 'gift-offer' : ''
+            ]
+              .filter(Boolean)
+              .join(' ')
 
             return (
-              <article className={isActive ? 'quest-card active' : 'quest-card'} key={item.quest.id}>
+              <article className={questClasses} key={item.quest.id}>
                 <div className="quest-topline">
                   <div>
                     <div className="place-badge">
                       <span className={item.quest.scope === 'partner' ? 'scope-pill partner' : 'scope-pill app'}>
-                        {item.quest.scope === 'partner' ? 'Партнёр' : 'Приложение'}
+                        {item.quest.scope === 'partner' ? 'Спецпредложение' : 'Приложение'}
                       </span>
                       {item.nearPartner ? <span className="scope-pill near">рядом</span> : null}
                       {item.completed ? <span className="scope-pill done">готово</span> : null}

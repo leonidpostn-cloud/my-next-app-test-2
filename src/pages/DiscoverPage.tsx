@@ -1,32 +1,69 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Place } from '../lib/types';
 import { Link } from 'react-router-dom'
 import {
-  discoverQuestions,
-  inferTagsFromFreeform,
-  recommendPlaces,
+  getDiscoverQuestions,
+  searchDgisPlacesByAnswers,
   type DiscoverAnswer,
   type DiscoverOption
 } from '../lib/discover'
 import { useAppState } from '../state/AppState'
 
 export default function DiscoverPage() {
-  const { places, state } = useAppState()
+  const { state } = useAppState()
   const [answers, setAnswers] = useState<DiscoverAnswer[]>([])
-  const [freeform, setFreeform] = useState('')
   const [error, setError] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
   const [recommendations, setRecommendations] = useState<Array<{ place: Place; score: number; matchedTags: string[]; reason: string }>>([])
 
+  const questions = useMemo(() => getDiscoverQuestions(answers), [answers])
   const step = answers.length
-  const currentQuestion = discoverQuestions[step]
+  const currentQuestion = questions[step]
 
   useEffect(() => {
-    async function loadRecommendations() {
-      const recs = await recommendPlaces(places, answers, state.currentLocation)
-      setRecommendations(recs)
+    if (currentQuestion) {
+      return
     }
+
+    let isActive = true
+
+    async function loadRecommendations() {
+      setIsSearching(true)
+      setError('')
+
+      try {
+        const recs = await searchDgisPlacesByAnswers(answers, state.currentLocation)
+
+        if (!isActive) {
+          return
+        }
+
+        setRecommendations(recs)
+        window.sessionStorage.setItem('otkryvaika-discover-places', JSON.stringify(recs.map((item: { place: Place }) => item.place)))
+
+        if (recs.length === 0) {
+          setError('2ГИС не нашёл подходящие места по этим ответам. Попробуйте расширить радиус или пройти подбор заново.')
+        }
+      } catch (searchError) {
+        if (!isActive) {
+          return
+        }
+
+        setRecommendations([])
+        setError(searchError instanceof Error ? searchError.message : 'Не удалось выполнить поиск в 2ГИС.')
+      } finally {
+        if (isActive) {
+          setIsSearching(false)
+        }
+      }
+    }
+
     loadRecommendations()
-  }, [places, answers, state.currentLocation])
+
+    return () => {
+      isActive = false
+    }
+  }, [answers, currentQuestion, state.currentLocation])
 
   function advanceWithOption(option: DiscoverOption) {
     if (!currentQuestion) {
@@ -39,43 +76,16 @@ export default function DiscoverPage() {
       {
         questionId: currentQuestion.id,
         label: option.label,
-        tags: option.tags
+        tags: option.tags,
+        query: option.query
       }
     ])
-    setFreeform('')
-  }
-
-  function submitFreeform(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!currentQuestion) {
-      return
-    }
-
-    const value = freeform.trim()
-    if (!value) {
-      setError('Нужен хотя бы короткий ответ, чтобы продолжить.')
-      return
-    }
-
-    const tags = inferTagsFromFreeform(value)
-    setError('')
-    setAnswers((current) => [
-      ...current,
-      {
-        questionId: currentQuestion.id,
-        label: value,
-        freeform: value,
-        tags: tags.length > 0 ? tags : ['special']
-      }
-    ])
-    setFreeform('')
   }
 
   function resetQuiz() {
     setAnswers([])
-    setFreeform('')
     setError('')
+    setRecommendations([])
   }
 
   return (
@@ -83,18 +93,17 @@ export default function DiscoverPage() {
       <section className="hero-card compact-hero">
         <div className="hero-copy">
           <div className="eyebrow">Открывайка</div>
-          <h2>Укажите ваше местоположение</h2>
+          <h2>Соберём запрос к 2ГИС по вашим ответам</h2>
           <p>
-            Приложение покажет ближайшие места.
-            Вы здесь.
+            Ответьте на 6 коротких вопросов, а приложение найдёт 4-5 мест рядом с текущей точкой.
           </p>
         </div>
         <div className="quiz-progress">
-          <span>Шаг {Math.min(step + 1, discoverQuestions.length)} из {discoverQuestions.length}</span>
+          <span>Шаг {Math.min(step + 1, questions.length)} из {questions.length}</span>
           <div className="progress-track">
             <div
               className="progress-fill"
-              style={{ width: `${(answers.length / discoverQuestions.length) * 100}%` }}
+              style={{ width: `${(answers.length / questions.length) * 100}%` }}
             />
           </div>
         </div>
@@ -121,18 +130,6 @@ export default function DiscoverPage() {
               ))}
             </div>
 
-            <form className="freeform-row" onSubmit={submitFreeform}>
-              <input
-                className="text-input"
-                onChange={(event) => setFreeform(event.target.value)}
-                placeholder="Или ответь свободно: например “хочу тихое место с видом”"
-                value={freeform}
-              />
-              <button className="primary-button" type="submit">
-                Понять ответ
-              </button>
-            </form>
-
             {error ? <p className="error-copy">{error}</p> : null}
 
             <div className="answer-summary">
@@ -147,7 +144,7 @@ export default function DiscoverPage() {
           <div className="quiz-results section-card">
             <div className="section-heading">
               <strong>Готовая подборка</strong>
-              <span className="muted">Финальные 4 места, которые лучше всего совпали с ответами.</span>
+              <span className="muted">Места найдены через 2ГИС по собранным параметрам запроса.</span>
             </div>
 
             <div className="answer-summary">
@@ -157,6 +154,9 @@ export default function DiscoverPage() {
                 </span>
               ))}
             </div>
+
+            {isSearching ? <div className="empty-state"><p>Ищем подходящие места в 2ГИС...</p></div> : null}
+            {error ? <p className="error-copy">{error}</p> : null}
 
             <div className="recommend-grid">
               {recommendations.map((item, index) => (
@@ -176,7 +176,7 @@ export default function DiscoverPage() {
                     ))}
                   </div>
                   <div className="detail-actions">
-                    <Link className="primary-button" to={`/?focus=${item.place.id}`}>
+                    <Link className="primary-button" to={`/?focus=${encodeURIComponent(item.place.id)}`}>
                       На карте
                     </Link>
                     <Link className="secondary-button small" to="/notes">

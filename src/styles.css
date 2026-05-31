@@ -168,6 +168,29 @@ button {
   background: var(--surface-strong);
 }
 
+.metric-content {
+  display: grid;
+  gap: 8px;
+}
+
+.metric-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.metric-label .icon {
+  display: inline-flex;
+  color: var(--primary-dark);
+}
+
+.metric-chip.accent .metric-label .icon {
+  color: #8c4f16;
+}
+
 .metric-chip strong,
 .stat-card strong {
   font-size: 1.5rem;
@@ -654,11 +677,53 @@ button {
 
 .quest-card {
   align-content: start;
+  position: relative;
+  overflow: hidden;
 }
 
 .quest-card.active {
   border-color: rgba(42, 157, 143, 0.35);
   background: linear-gradient(135deg, rgba(42, 157, 143, 0.08), rgba(255, 255, 255, 0.92));
+}
+
+.quest-card.partner-offer {
+  border-color: rgba(244, 162, 97, 0.42);
+}
+
+.quest-card.partner-offer::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, #f4a261 0%, #e76f51 55%, #2a9d8f 100%);
+}
+
+.quest-card.promo-offer {
+  background:
+    linear-gradient(135deg, rgba(255, 214, 112, 0.28), rgba(255, 255, 255, 0.92) 54%),
+    radial-gradient(circle at top right, rgba(231, 111, 81, 0.16), transparent 34%);
+}
+
+.quest-card.gift-offer {
+  background:
+    linear-gradient(135deg, rgba(103, 183, 209, 0.2), rgba(255, 255, 255, 0.92) 58%),
+    radial-gradient(circle at top right, rgba(42, 157, 143, 0.18), transparent 32%);
+}
+
+.quest-card.partner-offer .quest-topline h3::after {
+  content: "спецпредложение";
+  display: inline-flex;
+  margin-left: 10px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(16, 37, 66, 0.9);
+  color: #fff;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
 }
 
 .quest-topline {
